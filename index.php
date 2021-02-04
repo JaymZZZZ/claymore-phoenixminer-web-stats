@@ -16,6 +16,16 @@
 require_once 'conf.php';
 require_once 'json_parser.class.php';
 
+
+if($debug_mode)	{
+        error_reporting(E_ERROR|E_WARNING);
+       	ini_set('display_errors', 1);
+} else {
+       	error_reporting(0);
+       	ini_set('display_errors', 0);
+}
+
+
 $parser = new json_parser();
 $parser->server_list = $server_list;
 $parser->wait_timeout = $wait_timeout;
