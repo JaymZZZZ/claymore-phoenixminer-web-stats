@@ -13,6 +13,15 @@ Claymore-PhoenixMiner-Web-Stat is a simple PHP web stats page that utilizes the 
 * Display profitability from WhatToMine API
 
 
+## Before Using
+
+Make sure you are using either PhoenixMiner or Claymore and that you have the RPC API enabled.
+
+For PhoenixMiner:
+* Add the following to the end of your bat file - `-cdm 1 -cdmport <YOUR_PORT> -cdmpass <YOUR_PASSWORD>`
+
+For Claymore:
+* Add the following to the end of your bat file - `-mport <YOUR_PORT> -mpsw <YOUR_PASSWORD>`
 
 ## How to use
 
