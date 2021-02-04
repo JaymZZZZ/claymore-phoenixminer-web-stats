@@ -57,4 +57,7 @@ $gpu_fan_red = 75;
 //Set the page refresh interval
 $refresh_interval = 15;
 
+//Enable Debug Mode if you are having issues
+$debug_mode = FALSE;
+
 ?>
