@@ -358,8 +358,15 @@ $parser->parse_all_json_rpc_calls();
 
 <?php if($debug_mode) { ?>
 	<div class="stats">
-		DEBUG MODE
-		<?php echo json_encode($parser); ?>
+	DEBUG MODE
+	<?php
+        	foreach	($parser->server_list as $miner){
+                	$miner->hostname = "MASKED";
+                	$miner->port = "MASKED";
+	        	$miner->password = "MASKED";
+        	}
+       		echo json_encode($parser);
+	?>
 	</div>
 <?php } ?>
 </body>
