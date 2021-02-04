@@ -355,5 +355,12 @@ $parser->parse_all_json_rpc_calls();
         </div>
     </div>
 <?php } ?>
+
+<?php if($debug_mode) { ?>
+	<div class="stats">
+		DEBUG MODE
+		<?php echo json_encode($parser); ?>
+	</div>
+<?php } ?>
 </body>
 </html>
