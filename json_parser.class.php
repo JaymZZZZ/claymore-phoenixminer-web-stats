@@ -29,6 +29,7 @@ class json_parser
 	public $gpu_temp_red = 75;
 	public $gpu_fan_yellow = 50;
 	public $gpu_fan_red = 75;
+	public $curl_timeout = 10;
 
 
 	public function parse_all_json_rpc_calls()
@@ -206,8 +207,8 @@ class json_parser
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_timeout);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
 		$result = curl_exec($ch);
 		curl_close($ch);
 
