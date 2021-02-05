@@ -14,16 +14,16 @@
 // ------------------------------------------------------------------------
 
 require_once 'conf.php';
-require_once 'json_parser.class.php';
 
-
-if($debug_mode)	{
+if($debug_mode) {
         error_reporting(E_ERROR|E_WARNING);
-       	ini_set('display_errors', 1);
+        ini_set('display_errors', 1);
 } else {
-       	error_reporting(0);
-       	ini_set('display_errors', 0);
+        error_reporting(0);
+        ini_set('display_errors', 0);
 }
+
+require_once 'json_parser.class.php';
 
 
 $parser = new json_parser();
