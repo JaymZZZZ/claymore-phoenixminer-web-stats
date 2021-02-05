@@ -213,10 +213,15 @@ class json_parser
                 return $json_response;
         }
 
-	private function get_id_from_calculators($coin) {
+	 private function get_id_from_calculators($coin) {
 
-                $json_file = file_get_contents("./calculators.json");
+                if (!file_exists ($this->calc_json)){
 
+                        return 151;
+
+                }
+
+                $json_file = file_get_contents($this->calc_json);
                 $coin_list = json_decode(json_encode(json_decode($json_file), TRUE));
 
                 foreach ($coin_list->coins as $coin_id => $coin_item) {
