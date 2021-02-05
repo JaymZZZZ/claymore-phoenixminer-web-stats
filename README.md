@@ -23,6 +23,8 @@ For PhoenixMiner:
 For Claymore:
 * Add the following to the end of your bat file - `-mport <YOUR_PORT> -mpsw <YOUR_PASSWORD>`
 
+For your server/machine hosting the app, make sure you have the `php-curl` module installed if you wish to have profitability calculations
+
 ## How to use
 
 Usage of the script is simple, and all you need to run it is a server with PHP and IIS/Apache
