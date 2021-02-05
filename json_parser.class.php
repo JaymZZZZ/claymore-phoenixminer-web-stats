@@ -194,28 +194,41 @@ class json_parser
 	}
 
 	private function get_profit_stats_from_api($hashrate, $coin, $power_usage, $power_cost, $pool_fee)
-	{
-		$ch = curl_init();
+        {
+                $ch = curl_init();
 
-		if ($coin == 'ETC') {
-			$coin_code = '162';
-		} else {
-			$coin_code = '151';
-		}
+                $coin_code = $this->get_id_from_calculators($coin);
 
-		$url = "https://whattomine.com/coins/" . $coin_code . ".json?hr=" . $hashrate . "&p=" . $power_usage . "&fee=" . $pool_fee . "&cost=" . $power_cost . "&hcost=0.0&commit=Calculate";
+                $url = "https://whattomine.com/coins/" . $coin_code . ".json?hr=" . $hashrate . "&p=" . $power_usage . "&fee=" . $pool_fee . "&cost=" . $power_cost . "&hcost=0.0&commit=Calculate";
 
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_timeout);
-		curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
-		$result = curl_exec($ch);
-		curl_close($ch);
+	        curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                $result = curl_exec($ch);
+                curl_close($ch);
 
-		$json_response = json_decode($result);
+                $json_response = json_decode($result);
 
-		return $json_response;
-	}
+                return $json_response;
+        }
+
+	private function get_id_from_calculators($coin) {
+
+                $json_file = file_get_contents("./calculators.json");
+
+                $coin_list = json_decode(json_encode(json_decode($json_file), TRUE));
+
+                foreach ($coin_list->coins as $coin_id => $coin_item) {
+                        if ($coin == $coin_item->tag) {
+
+                                return $coin_item->id;
+                        }
+                }
+
+                return 151;
+
+        }
 
 }
 
