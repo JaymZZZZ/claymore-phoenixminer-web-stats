@@ -30,6 +30,7 @@ class json_parser
 	public $gpu_fan_yellow = 50;
 	public $gpu_fan_red = 75;
 	public $curl_timeout = 10;
+	private $calc_json = "./calculators.json";
 
 
 	public function parse_all_json_rpc_calls()
