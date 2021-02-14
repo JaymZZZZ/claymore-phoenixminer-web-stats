@@ -23,6 +23,9 @@ For PhoenixMiner:
 For Claymore:
 * Add the following to the end of your bat file - `-mport <YOUR_PORT> -mpsw <YOUR_PASSWORD>`
 
+For TeamRedMiner:
+* Add the following to the end of your bat file - `--cm_api_listen=IP:PORT --cm_api_password=<YOUR_PASSWORD>`
+
 For your server/machine hosting the app, make sure you have the `php-curl` module installed if you wish to have profitability calculations
 
 ## How to use
