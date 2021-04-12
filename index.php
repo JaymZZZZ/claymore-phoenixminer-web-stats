@@ -15,6 +15,17 @@
 
 require_once 'conf.php';
 
+//calculate the maximum execution time based on the node count
+$node_count = count($server_list);
+
+if (is_numeric($node_count)) {
+	$execution_time = 5 + ($node_count * $wait_timeout);
+	if($execution_time >= 30) {
+		@set_time_limit($execution_time);
+	}
+
+}
+
 if($debug_mode) {
 	error_reporting(E_ERROR|E_WARNING);
 	ini_set('display_errors', 1);
