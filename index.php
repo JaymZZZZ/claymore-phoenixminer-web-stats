@@ -226,16 +226,19 @@ $parser->parse_all_json_rpc_calls();
         </div>
         <div class="box__body">
             <div class="stats stats--main">
-                <div class="stats__name"><?php echo $name; ?> (<?php echo $miner->coin ?>)</div>
-                <div class="stats__caption">Miner: <?php echo $miner->version ?></div>
+                <div class="stats__name"><?php echo $name; ?>
+                    (<?php echo ($miner->coin == null) ? "N/A" : $miner->coin ?>)
+                </div>
+                <div class="stats__caption">
+                    Miner: <?php echo ($miner->version == null) ? "N/A" : $miner->version ?></div>
                 <div class="stats__change">
                     <div class="stats__value stats__value--positive">Uptime</div>
-                    <div class="stats__period"><?php echo $miner->uptime ?></div>
+                    <div class="stats__period"><?php echo ($miner->uptime == null) ? "DOWN" : $miner->uptime ?></div>
                 </div>
             </div>
             <div class="stats">
                 <div class="stats__amount">Pool</div>
-                <div class="stats__caption"><?php echo $miner->pool ?></div>
+                <div class="stats__caption"><?php echo ($miner->pool == null) ? "N/A" : $miner->pool ?></div>
             </div>
             <div class="stats">
                 <div class="stats__amount">Shares (Submitted / Stale / Rejected)</div>
@@ -251,7 +254,7 @@ $parser->parse_all_json_rpc_calls();
                 <div class="stats__amount">Miner
                     Hashrate <?php if (!is_null($miner->profitability->result->profit)) { ?>(Daily Profit)<?php } ?></div>
                 <div class="stats__caption">
-					<?php echo $miner->stats->hashrate ?>
+					<?php echo ($miner->stats->hashrate == null) ? "0.0" : $miner->stats->hashrate ?>
                     MH/s <?php if (!is_null($miner->profitability->result->profit)) { ?>(<?php echo $parser->show_profit($miner->profitability->result->profit) ?>)<?php } ?>
                 </div>
             </div>
@@ -278,7 +281,11 @@ $parser->parse_all_json_rpc_calls();
                                     <th><?php echo $parser->show_fan_warning($stat->fan, "%") ?></th>
                                 </tr>
 							<?php }
-						} ?>
+						} else { ?>
+                            <tr>
+                                <td colspan="4"> No Card Data Available</td>
+                            </tr>
+						<?php } ?>
                         </tbody>
                     </table>
                 </div>
