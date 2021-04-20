@@ -20,24 +20,26 @@ $node_count = count((array)$server_list);
 
 if (is_numeric($node_count)) {
 	$execution_time = 5 + ($node_count * $wait_timeout);
-	if($execution_time >= 30) {
-		@set_time_limit($execution_time);
+	if ($execution_time <= 30) {
+		$execution_time = 30;
 	}
-
+	@set_time_limit($execution_time);
 }
 
-if($debug_mode) {
-	error_reporting(E_ERROR|E_WARNING);
+require_once 'json_parser.class.php';
+$parser = new json_parser();
+
+if ($debug_mode) {
+	error_reporting(E_ERROR | E_WARNING);
 	ini_set('display_errors', 1);
+	$parser->debug = TRUE;
+
 } else {
 	error_reporting(0);
 	ini_set('display_errors', 0);
 }
 
-require_once 'json_parser.class.php';
 
-
-$parser = new json_parser();
 $parser->server_list = $server_list;
 $parser->wait_timeout = $wait_timeout;
 
@@ -54,230 +56,253 @@ $parser->parse_all_json_rpc_calls();
 <!DOCTYPE html>
 <html lang='en' class=''>
 <head>
-	<title><?php echo $parser->miner_count ?> Miners: <?php echo $parser->global_hashrate ?> MH/s</title>
-	<meta charset='UTF-8'>
-	<meta name="robots" content="noindex">
-	<meta http-equiv="refresh" content="<?php echo $refresh_interval ?>">
-	<link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
-	<style class="cp-pen-styles">@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
+    <title><?php echo $parser->miner_count ?> Miners: <?php echo $parser->global_hashrate ?> MH/s</title>
+    <meta charset='UTF-8'>
+    <meta name="robots" content="noindex">
+    <meta http-equiv="refresh" content="<?php echo $refresh_interval ?>">
+    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
+    <style class="cp-pen-styles">@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
 
-		/* --------------------CSS----------------- */
+        /* --------------------CSS----------------- */
 
-		body {
-			background: #222;
-			font: 16px 'Open Sans', sans-serif;
-			padding: 20px;
-		}
+        body {
+            background: #222;
+            font: 16px 'Open Sans', sans-serif;
+            padding: 20px;
+        }
 
-		.box span {
-			font-family: 'Lato', sans-serif;
-			font-weight: 300;
-			font-size: 20px;
-			position: absolute;
-		}
+        .box span {
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+            font-size: 20px;
+            position: absolute;
+        }
 
-		.box span:nth-child(2) {
-			top: 2px;
-			left: 125px;
-		}
+        .box span:nth-child(2) {
+            top: 2px;
+            left: 125px;
+        }
 
-		.box span:nth-child(7) {
-			top: 85px;
-			left: 125px;
-		}
+        .box span:nth-child(7) {
+            top: 85px;
+            left: 125px;
+        }
 
-		.box span:nth-child(12) {
-			top: 165px;
-			left: 125px;
-		}
+        .box span:nth-child(12) {
+            top: 165px;
+            left: 125px;
+        }
 
-		.box {
-			background: linear-gradient(#23ba58, #1d8241);
-			position: relative;
-			display: inline-block;
-			border-radius: 5px;
-			width: 480px;
-			height: 540px;
-			vertical-align: top;
-			margin-bottom: 10px;
-		}
+        .box {
+            background: linear-gradient(#23ba58, #1d8241);
+            position: relative;
+            display: inline-block;
+            border-radius: 5px;
+            width: 480px;
+            height: 540px;
+            vertical-align: top;
+            margin-bottom: 10px;
+        }
 
-		.box-down {
-			background: linear-gradient(#9e3935, #993259);
-		}
+        .box-debug {
+            background: linear-gradient(#fffc1c, #ccc508);
+            position: relative;
+            display: inline-block;
+            border-radius: 5px;
+            width: 95%;
+            min-height: 100px;
+            vertical-align: top;
+            margin-bottom: 10px;
+            overflow-wrap: normal;
+        }
 
-		.box__header {
-			padding: 10px 25px;
-			position: relative;
-		}
+        .box-down {
+            background: linear-gradient(#9e3935, #993259);
+        }
 
-		.box__body {
-			padding: 0 25px;
-		}
+        .box__header {
+            padding: 10px 25px;
+            position: relative;
+        }
 
-		/* STATS */
+        .box__body {
+            padding: 0 25px;
+        }
 
-		.stats {
-			color: #fff;
-			position: relative;
-			padding-bottom: 18px;
-		}
+        /* STATS */
 
-		.stats__amount {
-			font-size: 15px;
-			font-weight: bold;
-			line-height: 1.1;
-		}
+        .stats {
+            color: #fff;
+            position: relative;
+            padding-bottom: 18px;
+        }
 
-		.stats__name {
-			font-size: 14px;
-			font-weight: bold;
-			line-height: 1.1;
-		}
+        .stats__amount {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
 
-		.stats__caption {
-			font-size: 18px;
+        .stats__name {
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
 
-		}
+        .stats__caption {
+            font-size: 18px;
 
-		.stats__change {
-			position: absolute;
-			top: 6px;
-			right: 0;
-			text-align: right;
-		}
+        }
 
-		.stats__value {
-			font-size: 18px;
-		}
+        .stats__change {
+            position: absolute;
+            top: 6px;
+            right: 0;
+            text-align: right;
+        }
 
-		.stats__period {
-			font-size: 18px;
-			font-weight: bold;
-		}
+        .stats__value {
+            font-size: 18px;
+        }
 
-		.stats__value--positive {
-			color: #AEDC6F;
-			font-weight: bold;
-		}
+        .stats__period {
+            font-size: 18px;
+            font-weight: bold;
+        }
 
-		.stats__value--negative {
-			color: #ee8b8f;
-			font-weight: bold;
-		}
+        .stats__value--positive {
+            color: #AEDC6F;
+            font-weight: bold;
+        }
 
-		.yellow-alert {
-			color: #d3b715;
-			font-weight: bold;
-		}
+        .stats__value--negative {
+            color: #ee8b8f;
+            font-weight: bold;
+        }
 
-		.red-alert {
-			color: #ee8b8f;
-			font-weight: bold;
-		}
+        .yellow-alert {
+            color: #d3b715;
+            font-weight: bold;
+        }
 
-		.stats--main .stats__amount {
-			font-size: 40px;
-		}
+        .red-alert {
+            color: #ee8b8f;
+            font-weight: bold;
+        }
 
-		.stats__name {
-			font-size: 34px;
-		}
-	</style>
+        .stats--main .stats__amount {
+            font-size: 40px;
+        }
+
+        .stats__name {
+            font-size: 34px;
+        }
+    </style>
 </head>
 <body>
 <div class="stats stats--main">
-	<div class="stats__amount">Global Hashrate: <?php echo $parser->global_hashrate ?> MH/s</div>
+    <div class="stats__amount">Global Hashrate: <?php echo $parser->global_hashrate ?> MH/s</div>
 </div>
 <?php foreach ($parser->miner_data_results as $name => $miner) { ?>
-	<div class="box <?php if ($parser->miner_status->{$name} != 1) { ?> box-down <?php } ?>">
-		<div class="box__header">
+    <div class="box <?php if ($parser->miner_status->{$name} != 1) { ?> box-down <?php } ?>">
+        <div class="box__header">
 			<?php if ($parser->miner_status->{$name} == 1) { ?>
-				<div class="server">
-					<ul>
-						<li></li>
-						<li></li>
-						<li></li>
-					</ul>
-				</div>
+                <div class="server">
+                    <ul>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                </div>
 			<?php } else { ?>
-				<div class="server error">
-					<ul>
-						<li></li>
-						<li></li>
-						<li></li>
-					</ul>
-				</div>
+                <div class="server error">
+                    <ul>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                </div>
 			<?php } ?>
-		</div>
-		<div class="box__body">
-			<div class="stats stats--main">
-				<div class="stats__name"><?php echo $name; ?> (<?php echo $miner->coin ?>)</div>
-				<div class="stats__caption">Miner: <?php echo $miner->version ?></div>
-				<div class="stats__change">
-					<div class="stats__value stats__value--positive">Uptime</div>
-					<div class="stats__period"><?php echo $miner->uptime ?></div>
-				</div>
-			</div>
-			<div class="stats">
-				<div class="stats__amount">Pool</div>
-				<div class="stats__caption"><?php echo $miner->pool ?></div>
-			</div>
-			<div class="stats">
-				<div class="stats__amount">Shares (Submitted / Stale / Rejected)</div>
-				<div class="stats__caption">
-					<div class="stats__value--positive" style="display: inline;"><?php echo number_format($miner->stats->shares, 0) ?></div>
-					/ <?php echo number_format($miner->stats->stale, 0) ?> /
-					<div class="stats__value--negative" style="display: inline;"><?php echo number_format($miner->stats->rejected, 0) ?></div>
-				</div>
-			</div>
-			<div class="stats">
-				<div class="stats__amount">Miner Hashrate <?php if (!is_null($miner->profitability->profit)) { ?>(Daily Profit)<?php } ?></div>
-				<div class="stats__caption">
-					<?php echo $miner->stats->hashrate ?> MH/s <?php if (!is_null($miner->profitability->profit)) { ?>(<?php echo $parser->show_profit($miner->profitability->profit) ?>)<?php } ?>
-				</div>
-			</div>
-			<div class="stats">
-				<div class="stats__amount">Video Card Stats</div>
-				<div class="stats__caption">
-					<table width="100%">
-						<thead>
-						<tr>
-							<th class="stats__amount">Card</th>
-							<th class="stats__amount">Hashrate</th>
-							<th class="stats__amount">GPU Temp</th>
-							<th class="stats__amount">Fan %</th>
-						</tr>
-						</thead>
-						<tbody>
-						<?php foreach ($miner->card_stats as $key => $stat) { ?>
-							<tr>
-								<th>Card <?php echo $key; ?></th>
-								<th><?php echo number_format($stat->hashrate, 2) ?> MH/s</th>
-								<th><?php echo $parser->show_temp_warning($stat->temp, "&deg; C") ?></th>
-								<th><?php echo $parser->show_fan_warning($stat->fan, "%") ?></th>
-							</tr>
-						<?php } ?>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
+        </div>
+        <div class="box__body">
+            <div class="stats stats--main">
+                <div class="stats__name"><?php echo $name; ?> (<?php echo $miner->coin ?>)</div>
+                <div class="stats__caption">Miner: <?php echo $miner->version ?></div>
+                <div class="stats__change">
+                    <div class="stats__value stats__value--positive">Uptime</div>
+                    <div class="stats__period"><?php echo $miner->uptime ?></div>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stats__amount">Pool</div>
+                <div class="stats__caption"><?php echo $miner->pool ?></div>
+            </div>
+            <div class="stats">
+                <div class="stats__amount">Shares (Submitted / Stale / Rejected)</div>
+                <div class="stats__caption">
+                    <div class="stats__value--positive"
+                         style="display: inline;"><?php echo number_format($miner->stats->shares, 0) ?></div>
+                    / <?php echo number_format($miner->stats->stale, 0) ?> /
+                    <div class="stats__value--negative"
+                         style="display: inline;"><?php echo number_format($miner->stats->rejected, 0) ?></div>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stats__amount">Miner
+                    Hashrate <?php if (!is_null($miner->profitability->result->profit)) { ?>(Daily Profit)<?php } ?></div>
+                <div class="stats__caption">
+					<?php echo $miner->stats->hashrate ?>
+                    MH/s <?php if (!is_null($miner->profitability->result->profit)) { ?>(<?php echo $parser->show_profit($miner->profitability->result->profit) ?>)<?php } ?>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stats__amount">Video Card Stats</div>
+                <div class="stats__caption">
+                    <table width="100%">
+                        <thead>
+                        <tr>
+                            <th class="stats__amount">Card</th>
+                            <th class="stats__amount">Hashrate</th>
+                            <th class="stats__amount">GPU Temp</th>
+                            <th class="stats__amount">Fan %</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+						<?php
+						if (count((array)$miner->card_stats) >= 1) {
+							foreach ($miner->card_stats as $key => $stat) { ?>
+                                <tr>
+                                    <th>Card <?php echo $key; ?></th>
+                                    <th><?php echo number_format($stat->hashrate, 2) ?> MH/s</th>
+                                    <th><?php echo $parser->show_temp_warning($stat->temp, "&deg; C") ?></th>
+                                    <th><?php echo $parser->show_fan_warning($stat->fan, "%") ?></th>
+                                </tr>
+							<?php }
+						} ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 <?php } ?>
 
-<?php if($debug_mode) { ?>
-	<div class="stats">
-		DEBUG MODE
+<?php if ($debug_mode) { ?>
+    <div class="box-debug">
+        DEBUG MODE
 		<?php
-		foreach	($parser->server_list as $miner){
+		foreach ($parser->server_list as $miner) {
 			$miner->hostname = "MASKED";
 			$miner->port = "MASKED";
 			$miner->password = "MASKED";
 		}
-		echo json_encode($parser);
+		echo "<pre>";
+		print_r($parser);
+		echo "Node Count:" . $node_count . "<br>";
+		echo "Execution Time:" . $execution_time . "<br>";
+		echo "</pre>";
 		?>
-	</div>
+    </div>
 <?php } ?>
 </body>
 </html>
