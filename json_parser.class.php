@@ -5,11 +5,11 @@
  * Simple PHP page to connect to any number of Claymore and PhoenixMiner miners and view hashrates, GPU temps, and fan speeds.
  *
  * @package     claymore-phoenixminer-web-stats
- * @version     1.0.1
+ * @version     1.0
  * @author      James D (jimok82@gmail.com)
  * @copyright   Copyright (c) 2018 James D.
  * @license     This file is part of claymore-phoenixminer-web-stats - free software licensed under the GNU General Public License version 3
- * @link        https://github.com/JaymZZZZ/claymore-phoenixminer-web-stats
+ * @link        https://github.com/jimok82/claymore-phoenixminer-web-stats
  */
 
 // ------------------------------------------------------------------------
@@ -19,7 +19,6 @@ class json_parser
 {
 
 	public $server_list = [];
-	public $miner_data = [];
 	public $miner_status = [];
 	public $miner_data_results = [];
 	public $global_hashrate = 0;
@@ -29,8 +28,8 @@ class json_parser
 	public $gpu_temp_red = 75;
 	public $gpu_fan_yellow = 50;
 	public $gpu_fan_red = 75;
-	public $curl_timeout = 10;
 	private $calc_json = "./calculators.json";
+	public $debug = FALSE;
 
 
 	public function parse_all_json_rpc_calls()
@@ -166,12 +165,14 @@ class json_parser
 
 		$x = 1;
 		foreach ($this->server_list as $name => $server) {
-			if ($fp = fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str, $this->wait_timeout)) {
+			if ($fp = @fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str, $this->wait_timeout)) {
 				$this->miner_status[$name] = '1';
 			} else {
 				$this->miner_status[$name] = '3';
 			}
-			fclose($fp);
+			if($fp) {
+				fclose($fp);
+			}
 			$x++;
 		}
 
@@ -195,46 +196,53 @@ class json_parser
 	}
 
 	private function get_profit_stats_from_api($hashrate, $coin, $power_usage, $power_cost, $pool_fee)
-        {
-                $ch = curl_init();
+	{
+		$ch = curl_init();
 
-                $coin_code = $this->get_id_from_calculators($coin);
+		$coin_code = $this->get_id_from_calculators($coin);
 
-                $url = "https://whattomine.com/coins/" . $coin_code . ".json?hr=" . $hashrate . "&p=" . $power_usage . "&fee=" . $pool_fee . "&cost=" . $power_cost . "&hcost=0.0&commit=Calculate";
+		$url = "https://whattomine.com/coins/" . $coin_code . ".json?hr=" . $hashrate . "&p=" . $power_usage . "&fee=" . $pool_fee . "&cost=" . $power_cost . "&hcost=0.0&commit=Calculate";
 
-	        curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-                $result = curl_exec($ch);
-                curl_close($ch);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+		$result = curl_exec($ch);
 
-                $json_response = json_decode($result);
+		if ($this->debug) {
+			$json_response['debug']['url'] = $url;
+			$json_response['debug']['curl_info'] = curl_getinfo($ch);
+		}
+		curl_close($ch);
 
-                return $json_response;
-        }
+		$json_response['result'] = json_decode($result);
 
-	 private function get_id_from_calculators($coin) {
+		return (object)$json_response;
+	}
 
-                if (!file_exists ($this->calc_json)){
+	private function get_id_from_calculators($coin)
+	{
 
-                        return 151;
+		if (!file_exists($this->calc_json)) {
 
-                }
+			return 151;
 
-                $json_file = file_get_contents($this->calc_json);
-                $coin_list = json_decode(json_encode(json_decode($json_file), TRUE));
+		}
 
-                foreach ($coin_list->coins as $coin_id => $coin_item) {
-                        if ($coin == $coin_item->tag) {
+		$json_file = file_get_contents($this->calc_json);
 
-                                return $coin_item->id;
-                        }
-                }
+		$coin_list = json_decode(json_encode(json_decode($json_file), TRUE));
 
-                return 151;
+		foreach ($coin_list->coins as $coin_id => $coin_item) {
+			if ($coin == $coin_item->tag) {
 
-        }
+				return $coin_item->id;
+			}
+		}
+
+		return 151;
+
+	}
 
 }
 
