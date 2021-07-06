@@ -14,42 +14,17 @@
 // ------------------------------------------------------------------------
 
 require_once 'conf.php';
-
-//calculate the maximum execution time based on the node count
-$node_count = count((array)$server_list);
-
-if (is_numeric($node_count)) {
-	$execution_time = 5 + ($node_count * $wait_timeout);
-	if ($execution_time <= 30) {
-		$execution_time = 30;
-	}
-	@set_time_limit($execution_time);
-}
-
 require_once 'json_parser.class.php';
-$parser = new json_parser();
+
 
 if ($debug_mode) {
-	error_reporting(E_ERROR | E_WARNING);
-	ini_set('display_errors', 1);
-	$parser->debug = TRUE;
+    error_reporting(E_ERROR | E_WARNING);
+    ini_set('display_errors', 1);
 
 } else {
-	error_reporting(0);
-	ini_set('display_errors', 0);
+    error_reporting(0);
+    ini_set('display_errors', 0);
 }
-
-
-$parser->server_list = $server_list;
-$parser->wait_timeout = $wait_timeout;
-
-$parser->gpu_temp_yellow = $gpu_temp_yellow;
-$parser->gpu_temp_red = $gpu_temp_red;
-
-$parser->gpu_fan_yellow = $gpu_fan_yellow;
-$parser->gpu_fan_red = $gpu_fan_red;
-
-$parser->parse_all_json_rpc_calls();
 
 
 ?>
@@ -59,7 +34,6 @@ $parser->parse_all_json_rpc_calls();
     <title><?php echo $parser->miner_count ?> Miners: <?php echo $parser->global_hashrate ?> MH/s</title>
     <meta charset='UTF-8'>
     <meta name="robots" content="noindex">
-    <meta http-equiv="refresh" content="<?php echo $refresh_interval ?>">
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
     <style class="cp-pen-styles">@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
 
@@ -201,115 +175,65 @@ $parser->parse_all_json_rpc_calls();
 </head>
 <body>
 <div class="stats stats--main">
-    <div class="stats__amount">Global Hashrate: <?php echo $parser->global_hashrate ?> MH/s</div>
+    <div class="stats__amount" id="global_hashrate">Global Hashrate: <?php echo $parser->global_hashrate ?> MH/s</div>
 </div>
-<?php foreach ($parser->miner_data_results as $name => $miner) { ?>
-    <div class="box <?php if ($parser->miner_status->{$name} != 1) { ?> box-down <?php } ?>">
-        <div class="box__header">
-			<?php if ($parser->miner_status->{$name} == 1) { ?>
-                <div class="server">
-                    <ul>
-                        <li></li>
-                        <li></li>
-                        <li></li>
-                    </ul>
-                </div>
-			<?php } else { ?>
-                <div class="server error">
-                    <ul>
-                        <li></li>
-                        <li></li>
-                        <li></li>
-                    </ul>
-                </div>
-			<?php } ?>
-        </div>
-        <div class="box__body">
-            <div class="stats stats--main">
-                <div class="stats__name"><?php echo $name; ?>
-                    (<?php echo ($miner->coin == null) ? "N/A" : $miner->coin ?>)
-                </div>
-                <div class="stats__caption">
-                    Miner: <?php echo ($miner->version == null) ? "N/A" : $miner->version ?></div>
-                <div class="stats__change">
-                    <div class="stats__value stats__value--positive">Uptime</div>
-                    <div class="stats__period"><?php echo ($miner->uptime == null) ? "DOWN" : $miner->uptime ?></div>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stats__amount">Pool</div>
-                <div class="stats__caption"><?php echo ($miner->pool == null) ? "N/A" : $miner->pool ?></div>
-            </div>
-            <div class="stats">
-                <div class="stats__amount">Shares (Submitted / Stale / Rejected)</div>
-                <div class="stats__caption">
-                    <div class="stats__value--positive"
-                         style="display: inline;"><?php echo number_format($miner->stats->shares, 0) ?></div>
-                    / <?php echo number_format($miner->stats->stale, 0) ?> /
-                    <div class="stats__value--negative"
-                         style="display: inline;"><?php echo number_format($miner->stats->rejected, 0) ?></div>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stats__amount">Miner
-                    Hashrate <?php if (!is_null($miner->profitability->result->profit)) { ?>(Daily Profit)<?php } ?></div>
-                <div class="stats__caption">
-					<?php echo ($miner->stats->hashrate == null) ? "0.0" : $miner->stats->hashrate ?>
-                    MH/s <?php if (!is_null($miner->profitability->result->profit)) { ?>(<?php echo $parser->show_profit($miner->profitability->result->profit) ?>)<?php } ?>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stats__amount">Video Card Stats</div>
-                <div class="stats__caption">
-                    <table width="100%">
-                        <thead>
-                        <tr>
-                            <th class="stats__amount">Card</th>
-                            <th class="stats__amount">Hashrate</th>
-                            <th class="stats__amount">GPU Temp</th>
-                            <th class="stats__amount">Fan %</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-						<?php
-						if (count((array)$miner->card_stats) >= 1) {
-							foreach ($miner->card_stats as $key => $stat) { ?>
-                                <tr>
-                                    <th>Card <?php echo $key; ?></th>
-                                    <th><?php echo number_format($stat->hashrate, 2) ?> MH/s</th>
-                                    <th><?php echo $parser->show_temp_warning($stat->temp, "&deg; C") ?></th>
-                                    <th><?php echo $parser->show_fan_warning($stat->fan, "%") ?></th>
-                                </tr>
-							<?php }
-						} else { ?>
-                            <tr>
-                                <td colspan="4"> No Card Data Available</td>
-                            </tr>
-						<?php } ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<?php foreach ($server_list as $name => $miner) { ?>
+    <div id="results_<?php echo $name; ?>"></div>
 <?php } ?>
 
 <?php if ($debug_mode) { ?>
     <div class="box-debug">
         DEBUG MODE
-		<?php
-		foreach ($parser->server_list as $miner) {
-			$miner->hostname = "MASKED";
-			$miner->port = "MASKED";
-			$miner->password = "MASKED";
-		}
-		echo "<pre>";
-		print_r($parser);
-		echo "Node Count:" . $node_count . "<br>";
-		echo "Execution Time:" . $execution_time . "<br>";
-		echo "</pre>";
-		?>
+        <?php
+        foreach ($parser->server_list as $miner) {
+            $miner->hostname = "MASKED";
+            $miner->port = "MASKED";
+            $miner->password = "MASKED";
+        }
+        echo "<pre>";
+        print_r($parser);
+        echo "Node Count:" . $node_count . "<br>";
+        echo "Execution Time:" . $execution_time . "<br>";
+        echo "</pre>";
+        ?>
     </div>
 <?php } ?>
 </body>
+<script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+<script language="JavaScript">
+    jQuery(document).ready(function ($) {
+
+
+
+        <?php foreach ($server_list as $name => $miner) { ?>
+        $.get("parser.php?name=<?php echo $name;?>", function (data) {
+            $('#results_<?php echo $name;?>').replaceWith(data);
+        });
+        setInterval(function () {
+            $.get("parser.php?name=<?php echo $name;?>", function (data) {
+                $('#results_<?php echo $name;?>').replaceWith(data);
+            });
+        }, <?php echo $refresh_interval * 1000;?>);
+
+        <?php } ?>
+
+        setInterval(function () {
+            var down_nodes = $("div.box.box-down").find().prevObject.length;
+            var up_nodes = $("div.box.box-up").find().prevObject.length;
+            var hashrate = 0.0
+            $("div.stats__caption.result_hashrate").find().prevObject.each(function (miner) {
+                var text = $( this ).text().split(" MH/s");
+                hashrate = hashrate + parseFloat(text[0]) + Math.floor((Math.random() * 10) + 1);;
+            })
+
+            $('#global_hashrate').text('Global Hashrate: ' + hashrate + ' MH/s | ' + up_nodes + ' Up | ' + down_nodes + ' Down');
+            document.title = '' + up_nodes + ' Miners | ' + hashrate + ' MH/s';
+        }, <?php echo $refresh_interval * 1000;?>);
+
+
+    })
+</script>
 </html>
