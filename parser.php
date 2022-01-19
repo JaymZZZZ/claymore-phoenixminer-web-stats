@@ -32,6 +32,13 @@ if ($debug_mode) {
 $parser->server_list = $server_list;
 $parser->wait_timeout = $wait_timeout;
 
+$parser->gpu_temp_yellow = $gpu_temp_yellow;
+$parser->gpu_temp_red = $gpu_temp_red;
+$parser->gpu_fan_high_yellow = $gpu_fan_high_yellow;
+$parser->gpu_fan_high_red = $gpu_fan_high_red;
+$parser->gpu_fan_low_yellow = $gpu_fan_low_yellow;
+$parser->gpu_fan_low_red = $gpu_fan_low_red;
+
 $parser->parse_all_json_rpc_calls($_GET['name']);
 
 ?>
