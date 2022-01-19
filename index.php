@@ -10,6 +10,11 @@
  * @copyright   Copyright (c) 2018 James D.
  * @license     This file is part of claymore-phoenixminer-web-stats - free software licensed under the GNU General Public License version 3
  * @link        https://github.com/JaymZZZZ/claymore-phoenixminer-web-stats
+ *
+ *
+ * @var boolean $debug_mode
+ * @var object $server_list
+ * @var integer $refresh_interval
  */
 // ------------------------------------------------------------------------
 
@@ -31,7 +36,7 @@ if ($debug_mode) {
 <!DOCTYPE html>
 <html lang='en' class=''>
 <head>
-    <title><?php echo $parser->miner_count ?> Miners: <?php echo $parser->global_hashrate ?> MH/s</title>
+    <title>0 Miners | 0 MH/s</title>
     <meta charset='UTF-8'>
     <meta name="robots" content="noindex">
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
@@ -175,29 +180,12 @@ if ($debug_mode) {
 </head>
 <body>
 <div class="stats stats--main">
-    <div class="stats__amount" id="global_hashrate">Global Hashrate: <?php echo $parser->global_hashrate ?> MH/s</div>
+    <div class="stats__amount" id="global_hashrate">Global Hashrate: 0 MH/s</div>
 </div>
 <?php foreach ($server_list as $name => $miner) { ?>
     <div id="results_<?php echo $name; ?>"></div>
 <?php } ?>
 
-<?php if ($debug_mode) { ?>
-    <div class="box-debug">
-        DEBUG MODE
-        <?php
-        foreach ($parser->server_list as $miner) {
-            $miner->hostname = "MASKED";
-            $miner->port = "MASKED";
-            $miner->password = "MASKED";
-        }
-        echo "<pre>";
-        print_r($parser);
-        echo "Node Count:" . $node_count . "<br>";
-        echo "Execution Time:" . $execution_time . "<br>";
-        echo "</pre>";
-        ?>
-    </div>
-<?php } ?>
 </body>
 <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -226,7 +214,7 @@ if ($debug_mode) {
             var hashrate = 0.0
             $("div.stats__caption.result_hashrate").find().prevObject.each(function (miner) {
                 var text = $( this ).text().split(" MH/s");
-                hashrate = hashrate + parseFloat(text[0]) + Math.floor((Math.random() * 10) + 1);;
+                hashrate = hashrate + parseFloat(text[0]);
             })
 
             $('#global_hashrate').text('Global Hashrate: ' + hashrate + ' MH/s | ' + up_nodes + ' Up | ' + down_nodes + ' Down');

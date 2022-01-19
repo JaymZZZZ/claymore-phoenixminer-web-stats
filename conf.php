@@ -64,4 +64,4 @@ $refresh_interval = 15;
 //Enable Debug Mode if you are having issues
 $debug_mode = FALSE;
 
-?>
+

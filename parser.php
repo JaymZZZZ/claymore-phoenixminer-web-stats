@@ -10,6 +10,21 @@
  * @copyright   Copyright (c) 2018 James D.
  * @license     This file is part of claymore-phoenixminer-web-stats - free software licensed under the GNU General Public License version 3
  * @link        https://github.com/JaymZZZZ/claymore-phoenixminer-web-stats
+ *
+ *
+ *
+ * @var boolean $debug_mode
+ * @var object $server_list
+ * @var integer $node_count
+ * @var integer $execution_time
+ * @var integer $refresh_interval
+ * @var integer $wait_timeout
+ * @var integer $gpu_temp_yellow
+ * @var integer $gpu_temp_red
+ * @var integer $gpu_fan_high_yellow
+ * @var integer $gpu_fan_high_red
+ * @var integer $gpu_fan_low_yellow
+ * @var integer $gpu_fan_low_red
  */
 // ------------------------------------------------------------------------
 
@@ -43,7 +58,8 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
 
 ?>
 <?php foreach ($parser->miner_data_results as $name => $miner) { ?>
-    <div id="results_<?php echo $name; ?>" class="box <?php if ($parser->miner_status->{$name} != 1) { ?> box-down <?php } else { ?> box-up <?php } ?>">
+    <div id="results_<?php echo $name; ?>"
+         class="box <?php if ($parser->miner_status->{$name} != 1) { ?> box-down <?php } else { ?> box-up <?php } ?>">
         <div class="box__header">
             <?php if ($parser->miner_status->{$name} == 1) { ?>
                 <div class="server">
@@ -74,7 +90,7 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
                     <div class="stats__value stats__value--positive">Uptime</div>
                     <div class="stats__period"><?php echo ($miner->uptime == null) ? "DOWN" : $miner->uptime ?></div>
                     <div class="stats__value">Update Time</div>
-                    <div class="stats__period"><?php echo date("H:i:s Y-m-d");?></div>
+                    <div class="stats__period"><?php echo date("H:i:s Y-m-d"); ?></div>
                 </div>
             </div>
             <div class="stats">
@@ -102,7 +118,7 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
             <div class="stats">
                 <div class="stats__amount">Video Card Stats</div>
                 <div class="stats__caption">
-                    <table width="100%">
+                    <table class="width: 100%">
                         <thead>
                         <tr>
                             <th class="stats__amount">Card</th>
