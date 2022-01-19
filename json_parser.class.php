@@ -26,8 +26,10 @@ class json_parser
     public $wait_timeout = 3;
     public $gpu_temp_yellow = 70;
     public $gpu_temp_red = 75;
-    public $gpu_fan_yellow = 50;
-    public $gpu_fan_red = 75;
+    public $gpu_fan_high_yellow = 50;
+    public $gpu_fan_high_red = 75;
+    public $gpu_fan_low_yellow = 20;
+    public $gpu_fan_low_red = 10;
     private $calc_json = "./calculators.json";
     public $debug = FALSE;
 
@@ -154,9 +156,13 @@ class json_parser
     public function show_fan_warning($value, $append)
     {
 
-        if ($value >= $this->gpu_fan_red) {
+        if ($value >= $this->gpu_fan_high_red) {
             return "<div class='red-alert' style='display: inline'>$value$append</div>";
-        } else if ($value >= $this->gpu_fan_yellow) {
+        } else if ($value >= $this->gpu_fan_high_yellow) {
+            return "<div class='yellow-alert' style='display: inline'>$value$append</div>";
+        } else if ($value <= $this->gpu_fan_low_red) {
+            return "<div class='red-alert' style='display: inline'>$value$append</div>";
+        } else if ($value <= $this->gpu_fan_low_yellow) {
             return "<div class='yellow-alert' style='display: inline'>$value$append</div>";
         } else {
             return $value . $append;
