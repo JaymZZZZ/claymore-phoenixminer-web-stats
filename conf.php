@@ -50,9 +50,13 @@ $wait_timeout = 3;
 $gpu_temp_yellow = 70;
 $gpu_temp_red = 75;
 
-//Set the GPU Fan yellow and red alert values in Percent of max speed
-$gpu_fan_yellow = 50;
-$gpu_fan_red = 75;
+//Set the MAXIMUM GPU Fan yellow and red alert values in Percent of max speed
+$gpu_fan_high_yellow = 50;
+$gpu_fan_high_red = 75;
+
+//Set the MINIMUM GPU Fan yellow and red alert values in Percent of max speed
+$gpu_fan_low_yellow = 20;
+$gpu_fan_low_red = 10;
 
 //Set the page refresh interval
 $refresh_interval = 15;
