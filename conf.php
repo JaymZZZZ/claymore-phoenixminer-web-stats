@@ -25,22 +25,22 @@
 //      'pool_fee' => Set the pool fee percentage, for profit calculation
 //]
 $server_list = (object)[
-	'Server_1' => [
-		'hostname' => "server1.example.com",
-		'port' => 3333,
-		'password' => 'server_1_password',
-		'power_usage' => null,
-		'power_cost' => null,
-		'pool_fee' => null,
-	],
-	'Server_2' => [
-		'hostname' => "server2.example.com",
-		'port' => 3333,
-		'password' => 'server_2_password',
-		'power_usage' => null,
-		'power_cost' => null,
-		'pool_fee' => null,
-	]
+    'Server_1' => [
+        'hostname' => "server1.example.com",
+        'port' => 3333,
+        'password' => 'server_1_password',
+        'power_usage' => null,
+        'power_cost' => null,
+        'pool_fee' => null,
+    ],
+    'Server_2' => [
+        'hostname' => "server2.example.com",
+        'port' => 3333,
+        'password' => 'server_2_password',
+        'power_usage' => null,
+        'power_cost' => null,
+        'pool_fee' => null,
+    ]
 ];
 
 //Set the socket wait timeout

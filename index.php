@@ -213,7 +213,7 @@ if ($debug_mode) {
             var up_nodes = $("div.box.box-up").find().prevObject.length;
             var hashrate = 0.0
             $("div.stats__caption.result_hashrate").find().prevObject.each(function (miner) {
-                var text = $( this ).text().split(" MH/s");
+                var text = $(this).text().split(" MH/s");
                 hashrate = hashrate + parseFloat(text[0]);
             })
 
