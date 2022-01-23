@@ -14,7 +14,7 @@
 // ------------------------------------------------------------------------
 
 
-//Set the list of servers
+//Set the list of miners
 
 // 'Machine Name' => [
 //      'hostname' => Hostname or IP of node,
@@ -23,23 +23,32 @@
 //      'power_usage' => The power usage of the rig in watts, for profit calculation
 //      'power_cost' => Set the power cost in USD per KW/h, for profit calculation
 //      'pool_fee' => Set the pool fee percentage, for profit calculation
+//      (OPTIONAL) 'is_trex' => Set to 1 if using Trex miner, since it will need a different parser
+//      (OPTIONAL) 'trex_secure' => Set to 1 if using HTTPS and 0 if using HTTP (HTTPS Recommended)
+//      (OPTIONAL) 'trex_api_password' => Required if using TRex Miner with an API key enabled - Must be the password you used to generate your API key
 //]
-$server_list = (object)[
-    'Server_1' => [
+$miner_list = (object)[
+    'Miner_Claymore_Example' => [
         'hostname' => "server1.example.com",
         'port' => 3333,
         'password' => 'server_1_password',
         'power_usage' => null,
         'power_cost' => null,
         'pool_fee' => null,
+        //'is_trex' => 0,
+        //'trex_secure' => 0
+        //'trex_api_password' => 'not_needed'
     ],
-    'Server_2' => [
+    'Miner_TRex_Example' => [
         'hostname' => "server2.example.com",
-        'port' => 3333,
+        'port' => 4067,
         'password' => 'server_2_password',
         'power_usage' => null,
         'power_cost' => null,
         'pool_fee' => null,
+        'is_trex' => 1,
+        'trex_secure' => 1,
+        'trex_api_password' => 'trex_api_password'
     ]
 ];
 

@@ -13,18 +13,19 @@
  *
  *
  * @var boolean $debug_mode
- * @var object $server_list
+ * @var object $miner_list
  * @var integer $refresh_interval
  */
 // ------------------------------------------------------------------------
 
 require_once 'conf.php';
-require_once 'json_parser.class.php';
 
 
 if ($debug_mode) {
     error_reporting(E_ERROR | E_WARNING);
     ini_set('display_errors', 1);
+    ini_set('error_prepend_string', '<p style="color: white;">');
+    ini_set('error_append_string', '</p>');
 
 } else {
     error_reporting(0);
@@ -77,7 +78,7 @@ if ($debug_mode) {
             position: relative;
             display: inline-block;
             border-radius: 5px;
-            width: 480px;
+            width: 550px;
             height: 540px;
             vertical-align: top;
             margin-bottom: 10px;
@@ -129,7 +130,7 @@ if ($debug_mode) {
         }
 
         .stats__caption {
-            font-size: 18px;
+            font-size: 16px;
 
         }
 
@@ -174,7 +175,7 @@ if ($debug_mode) {
         }
 
         .stats__name {
-            font-size: 34px;
+            font-size: 26px;
         }
     </style>
 </head>
@@ -182,7 +183,7 @@ if ($debug_mode) {
 <div class="stats stats--main">
     <div class="stats__amount" id="global_hashrate">Global Hashrate: 0 MH/s</div>
 </div>
-<?php foreach ($server_list as $name => $miner) { ?>
+<?php foreach ($miner_list as $name => $miner) { ?>
     <div id="results_<?php echo $name; ?>"></div>
 <?php } ?>
 
@@ -196,7 +197,7 @@ if ($debug_mode) {
 
 
 
-        <?php foreach ($server_list as $name => $miner) { ?>
+        <?php foreach ($miner_list as $name => $miner) { ?>
         $.get("parser.php?name=<?php echo $name;?>", function (data) {
             $('#results_<?php echo $name;?>').replaceWith(data);
         });

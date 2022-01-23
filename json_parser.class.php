@@ -18,7 +18,7 @@
 class json_parser
 {
 
-    public $server_list = [];
+    public $miner_list = [];
     public $miner_status = [];
     public $miner_data_results = [];
     public $global_hashrate = 0;
@@ -31,112 +31,207 @@ class json_parser
     public $gpu_fan_low_yellow = 20;
     public $gpu_fan_low_red = 10;
     private $calc_json = "./calculators.json";
+    public $error = null;
     public $debug = FALSE;
 
 
-    public function parse_all_json_rpc_calls($selected = null)
+    public function parse_all_json_rpc_calls($selected)
     {
 
-        if (!$selected) {
-            $this->check_server_availability();
+        $this->miner_list = $this->convert_to_object($this->miner_list);
+
+        //Make sure the request miner is in list
+        if (!$this->miner_list->{$selected} || !is_object($this->miner_list->{$selected})) {
+            return;
+        }
+        $miner = $this->miner_list->{$selected};
+        if ($miner->is_trex) {
+            $this->miner_status[$selected] = $this->verify_trex_server($miner);
         } else {
-            $this->server_list = $this->convert_to_object($this->server_list);
-
-            foreach ($this->server_list as $name => $server) {
-
-                if ($selected == $name) {
-                    if ($fp = @fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str, $this->wait_timeout)) {
-                        $this->miner_status[$name] = '1';
-                    } else {
-                        $this->miner_status[$name] = '3';
-                    }
-                }
-            }
+            $this->miner_status[$selected] = $this->verify_rpc_server($miner);
         }
 
         $this->miner_data_results = (object)[];
         $this->miner_status = $this->convert_to_object($this->miner_status);
 
-        foreach ($this->server_list as $name => $server) {
 
-            if ($selected == null || $selected == $name) {
-
-                $miner_data = (object)[];
-                if ($this->miner_status->{$name} == 1) {
-                    $socket = fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str);
-
-                    if ($server->password != null) {
-                        $append = ',"psw":"' . $server->password . '"';
-                    } else {
-                        $append = '';
-                    }
-
-                    $data = '{"id":1,"jsonrpc":"2.0","method":"miner_getstat1"' . $append . '} ' . "\r\n\r\n";
-
-                    fputs($socket, $data);
-                    $buffer = null;
-                    while (!feof($socket)) {
-                        $buffer .= fgets($socket, $server->port);
-                    }
-                    if ($socket) {
-                        fclose($socket);
-                    }
-
-                    $response = json_decode($buffer);
-                    $result = $response->result;
-
-                    $miner_info = explode(' - ', $result[0]);
-                    $miner_data->version = $miner_info[0];
-                    $miner_data->coin = $miner_info[1];
-
-                    $minutes = $result[1];
-                    $zero = new DateTime('@0');
-                    $offset = new DateTime('@' . $minutes * 60);
-                    $diff = $zero->diff($offset);
-                    $miner_data->uptime = $diff->format('%ad %hh %im');
-                    $hashrate_stats = explode(';', $result[2]);
-                    $card_hashrate_stats = explode(';', $result[3]);
-                    $fan_and_temps = explode(";", $result[6]);
-                    $miner_data->pool = $result[7];
-                    $invalid_share_stats = $result[8];
-
-
-                    $miner_data->stats = (object)[
-                        'hashrate' => round($hashrate_stats[0] / 1000, 2),
-                        'shares' => $hashrate_stats[1],
-                        'stale' => $invalid_share_stats[0],
-                        'rejected' => $hashrate_stats[2]
-                    ];
-
-                    $miner_data->card_stats = [];
-                    foreach ($card_hashrate_stats as $key => $card_hashrate_stat) {
-                        $val = $key * 2;
-                        $miner_data->card_stats[] = (object)[
-                            'hashrate' => round($card_hashrate_stat / 1000, 2),
-                            'temp' => $fan_and_temps[$val],
-                            'fan' => $fan_and_temps[$val + 1]
-                        ];
-                    }
-
-                    $temp_sum = 0;
-                    foreach ($miner_data->card_stats as $card_stat) {
-                        $temp_sum += $card_stat->temp;
-                    }
-                    $miner_data->temp_av = round($temp_sum / sizeof($miner_data->card_stats));
-
-                    if (is_numeric($server->power_usage) && is_numeric($server->power_cost) && is_numeric($server->pool_fee)) {
-                        $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $server->power_usage, $server->power_cost, $server->pool_fee);
-                    }
-                }
-
-                $this->miner_data_results->{$name} = $miner_data;
+        $miner_data = (object)[];
+        if ($this->miner_status->{$selected} == 1) {
+            if ($miner->is_trex) {
+                $miner_data = $this->get_trex_server_data($miner);
+            } else {
+                $miner_data = $this->get_rpc_server_data($miner);
             }
 
         }
 
+        $this->miner_data_results->{$selected} = $miner_data;
+
+
         $this->miner_data_results = $this->convert_to_object($this->miner_data_results);
 
         $this->get_farm_stats();
+    }
+
+
+    private function verify_rpc_server($miner)
+    {
+        if (!is_object($miner)) {
+            return '-1';
+        }
+        if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
+            fclose($fp);
+            return '1';
+        }
+
+        return '3';
+    }
+
+    private function verify_trex_server($miner)
+    {
+        if (!is_object($miner)) {
+            return '-1';
+        }
+        if ($this->get_trex_api_data($miner)) {
+            return '1';
+        }
+
+        return '3';
+    }
+
+    private function get_rpc_server_data($miner)
+    {
+        if (!is_object($miner)) {
+            return [];
+        }
+        $miner_data = (object)[];
+
+        $socket = fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str);
+
+        if ($miner->password != null) {
+            $append = ',"psw":"' . $miner->password . '"';
+        } else {
+            $append = '';
+        }
+
+        $data = '{"id":1,"jsonrpc":"2.0","method":"miner_getstat1"' . $append . '} ' . "\r\n\r\n";
+
+        fputs($socket, $data);
+        $buffer = null;
+        while (!feof($socket)) {
+            $buffer .= fgets($socket, $miner->port);
+        }
+        if ($socket) {
+            fclose($socket);
+        }
+
+        $response = json_decode($buffer);
+        $result = $response->result;
+
+        $miner_info = explode(' - ', $result[0]);
+        $miner_data->version = $miner_info[0];
+        $miner_data->coin = $miner_info[1];
+
+        $minutes = $result[1];
+        $zero = new DateTime('@0');
+        $offset = new DateTime('@' . $minutes * 60);
+        $diff = $zero->diff($offset);
+        $miner_data->uptime = $diff->format('%ad %hh %im');
+        $hashrate_stats = explode(';', $result[2]);
+        $card_hashrate_stats = explode(';', $result[3]);
+        $fan_and_temps = explode(";", $result[6]);
+        $miner_data->pool = $result[7];
+        $invalid_share_stats = $result[8];
+
+
+        $miner_data->stats = (object)[
+            'hashrate' => round($hashrate_stats[0] / 1000, 2),
+            'shares' => $hashrate_stats[1],
+            'stale' => $invalid_share_stats[0],
+            'rejected' => $hashrate_stats[2]
+        ];
+
+        $miner_data->card_stats = [];
+        $card_num = 1;
+        foreach ($card_hashrate_stats as $key => $card_hashrate_stat) {
+            $val = $key * 2;
+            $miner_data->card_stats["Card " . $card_num] = (object)[
+                'hashrate' => round($card_hashrate_stat / 1000, 2),
+                'temp' => $fan_and_temps[$val],
+                'mem_temp' => "N/A",
+                'fan' => $fan_and_temps[$val + 1]
+            ];
+            $card_num++;
+        }
+
+        $temp_sum = 0;
+        foreach ($miner_data->card_stats as $card_stat) {
+            $temp_sum += $card_stat->temp;
+        }
+        $miner_data->temp_av = round($temp_sum / sizeof($miner_data->card_stats));
+
+        if (is_numeric($miner->power_usage) && is_numeric($miner->power_cost) && is_numeric($miner->pool_fee)) {
+            $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $miner->power_usage, $miner->power_cost, $miner->pool_fee);
+        }
+
+        return $miner_data;
+    }
+
+    private function get_trex_server_data($miner)
+    {
+        if (!is_object($miner)) {
+            return [];
+        }
+        $response = $this->get_trex_api_data($miner);
+        if (!$response) {
+            return [];
+        }
+        $miner_data = (object)[];
+
+        $response = $this->convert_to_object($response);
+        $result = $response->result;
+
+        $miner_data->version = $result->description . " " . $result->version;
+        $miner_data->coin = $result->algorithm;
+
+        $minutes = $result->uptime / 60;
+        $zero = new DateTime('@0');
+        $offset = new DateTime('@' . $minutes * 60);
+        $diff = $zero->diff($offset);
+        $miner_data->uptime = $diff->format('%ad %hh %im');
+        $cards = $result->gpus;
+        $miner_data->pool = str_replace("stratum+tcp://", '', $result->active_pool->url);
+
+
+        $miner_data->stats = (object)[
+            'hashrate' => round($result->hashrate / 1000000, 2),
+            'shares' => $result->accepted_count,
+            'stale' => 0,
+            'rejected' => $result->rejected_count
+        ];
+
+        $miner_data->card_stats = [];
+        foreach ($cards as $card) {
+            $miner_data->card_stats[$card->vendor . " " . $card->name] = (object)[
+                'hashrate' => round($card->hashrate / 1000000, 2),
+                'temp' => $card->temperature,
+                'mem_temp' => $card->memory_temperature,
+                'fan' => $card->fan_speed
+            ];
+        }
+
+        $temp_sum = 0;
+        foreach ($miner_data->card_stats as $card_stat) {
+            $temp_sum += $card_stat->temp;
+        }
+        $miner_data->temp_av = round($temp_sum / sizeof($miner_data->card_stats));
+
+        if (is_numeric($miner->power_usage) && is_numeric($miner->power_cost) && is_numeric($miner->pool_fee)) {
+            $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $miner->power_usage, $miner->power_cost, $miner->pool_fee);
+        }
+
+        return $miner_data;
+
     }
 
     public function show_temp_warning($value, $append)
@@ -185,11 +280,11 @@ class json_parser
 
     private function check_server_availability()
     {
-        $this->server_list = $this->convert_to_object($this->server_list);
+        $this->miner_list = $this->convert_to_object($this->miner_list);
 
         $x = 1;
-        foreach ($this->server_list as $name => $server) {
-            if ($fp = @fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str, $this->wait_timeout)) {
+        foreach ($this->miner_list as $name => $miner) {
+            if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
                 $this->miner_status[$name] = '1';
             } else {
                 $this->miner_status[$name] = '3';
@@ -244,6 +339,59 @@ class json_parser
         $json_response['result'] = json_decode($result);
 
         return (object)$json_response;
+    }
+
+    private function get_trex_api_data($miner)
+    {
+
+        $sid = '';
+        $ch = curl_init();
+
+        $protocol = "http";
+        if ($miner->trex_secure) {
+            $protocol = "https";
+        }
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        if ($miner->trex_api_password) {
+
+            $login_url = $protocol . "://" . $miner->hostname . ":" . $miner->port . "/login?password=" . $miner->password;
+            curl_setopt($ch, CURLOPT_URL, $login_url);
+
+            $login_result = curl_exec($ch);
+
+            if (!$login_result) {
+                return FALSE;
+            }
+
+            $login_data = json_decode($login_result);
+
+            $sid = $login_data->sid;
+        }
+
+
+        $url = $protocol . "://" . $miner->hostname . ":" . $miner->port . "/summary?sid=" . $sid;
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $response = curl_exec($ch);
+        $result = json_decode($response);
+        if (!$result || $result->success == "0") {
+            return FALSE;
+        }
+
+        if ($this->debug) {
+            $json_response['debug']['url'] = $url;
+            $json_response['debug']['curl_info'] = curl_getinfo($ch);
+        }
+        curl_close($ch);
+
+        $json_response['result'] = $result;
+
+        return $json_response;
     }
 
     private function get_id_from_calculators($coin)
