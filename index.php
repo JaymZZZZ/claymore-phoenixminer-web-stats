@@ -13,7 +13,7 @@
  *
  *
  * @var boolean $debug_mode
- * @var object $server_list
+ * @var object $miner_list
  * @var integer $refresh_interval
  */
 // ------------------------------------------------------------------------
@@ -182,7 +182,7 @@ if ($debug_mode) {
 <div class="stats stats--main">
     <div class="stats__amount" id="global_hashrate">Global Hashrate: 0 MH/s</div>
 </div>
-<?php foreach ($server_list as $name => $miner) { ?>
+<?php foreach ($miner_list as $name => $miner) { ?>
     <div id="results_<?php echo $name; ?>"></div>
 <?php } ?>
 
@@ -196,7 +196,7 @@ if ($debug_mode) {
 
 
 
-        <?php foreach ($server_list as $name => $miner) { ?>
+        <?php foreach ($miner_list as $name => $miner) { ?>
         $.get("parser.php?name=<?php echo $name;?>", function (data) {
             $('#results_<?php echo $name;?>').replaceWith(data);
         });

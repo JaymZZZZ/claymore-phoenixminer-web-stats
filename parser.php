@@ -14,7 +14,7 @@
  *
  *
  * @var boolean $debug_mode
- * @var object $server_list
+ * @var object $miner_list
  * @var integer $node_count
  * @var integer $execution_time
  * @var integer $refresh_interval
@@ -44,7 +44,7 @@ if ($debug_mode) {
 }
 
 
-$parser->server_list = $server_list;
+$parser->miner_list = $miner_list;
 $parser->wait_timeout = $wait_timeout;
 
 $parser->gpu_temp_yellow = $gpu_temp_yellow;
@@ -154,7 +154,7 @@ if ($debug_mode) { ?>
     <div class="box-debug">
         DEBUG MODE
         <?php
-        foreach ($parser->server_list as $miner) {
+        foreach ($parser->miner_list as $miner) {
             $miner->hostname = "MASKED";
             $miner->port = "MASKED";
             $miner->password = "MASKED";

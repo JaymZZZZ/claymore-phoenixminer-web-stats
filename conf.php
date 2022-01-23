@@ -14,7 +14,7 @@
 // ------------------------------------------------------------------------
 
 
-//Set the list of servers
+//Set the list of miners
 
 // 'Machine Name' => [
 //      'hostname' => Hostname or IP of node,
@@ -24,8 +24,8 @@
 //      'power_cost' => Set the power cost in USD per KW/h, for profit calculation
 //      'pool_fee' => Set the pool fee percentage, for profit calculation
 //]
-$server_list = (object)[
-    'Server_1' => [
+$miner_list = (object)[
+    'Miner_1' => [
         'hostname' => "server1.example.com",
         'port' => 3333,
         'password' => 'server_1_password',
@@ -33,7 +33,7 @@ $server_list = (object)[
         'power_cost' => null,
         'pool_fee' => null,
     ],
-    'Server_2' => [
+    'Miner_2' => [
         'hostname' => "server2.example.com",
         'port' => 3333,
         'password' => 'server_2_password',

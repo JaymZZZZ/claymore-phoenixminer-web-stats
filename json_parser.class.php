@@ -18,7 +18,7 @@
 class json_parser
 {
 
-    public $server_list = [];
+    public $miner_list = [];
     public $miner_status = [];
     public $miner_data_results = [];
     public $global_hashrate = 0;
@@ -40,12 +40,12 @@ class json_parser
         if (!$selected) {
             $this->check_server_availability();
         } else {
-            $this->server_list = $this->convert_to_object($this->server_list);
+            $this->miner_list = $this->convert_to_object($this->miner_list);
 
-            foreach ($this->server_list as $name => $server) {
+            foreach ($this->miner_list as $name => $miner) {
 
                 if ($selected == $name) {
-                    if ($fp = @fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str, $this->wait_timeout)) {
+                    if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
                         $this->miner_status[$name] = '1';
                     } else {
                         $this->miner_status[$name] = '3';
@@ -57,16 +57,16 @@ class json_parser
         $this->miner_data_results = (object)[];
         $this->miner_status = $this->convert_to_object($this->miner_status);
 
-        foreach ($this->server_list as $name => $server) {
+        foreach ($this->miner_list as $name => $miner) {
 
             if ($selected == null || $selected == $name) {
 
                 $miner_data = (object)[];
                 if ($this->miner_status->{$name} == 1) {
-                    $socket = fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str);
+                    $socket = fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str);
 
-                    if ($server->password != null) {
-                        $append = ',"psw":"' . $server->password . '"';
+                    if ($miner->password != null) {
+                        $append = ',"psw":"' . $miner->password . '"';
                     } else {
                         $append = '';
                     }
@@ -76,7 +76,7 @@ class json_parser
                     fputs($socket, $data);
                     $buffer = null;
                     while (!feof($socket)) {
-                        $buffer .= fgets($socket, $server->port);
+                        $buffer .= fgets($socket, $miner->port);
                     }
                     if ($socket) {
                         fclose($socket);
@@ -124,8 +124,8 @@ class json_parser
                     }
                     $miner_data->temp_av = round($temp_sum / sizeof($miner_data->card_stats));
 
-                    if (is_numeric($server->power_usage) && is_numeric($server->power_cost) && is_numeric($server->pool_fee)) {
-                        $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $server->power_usage, $server->power_cost, $server->pool_fee);
+                    if (is_numeric($miner->power_usage) && is_numeric($miner->power_cost) && is_numeric($miner->pool_fee)) {
+                        $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $miner->power_usage, $miner->power_cost, $miner->pool_fee);
                     }
                 }
 
@@ -185,11 +185,11 @@ class json_parser
 
     private function check_server_availability()
     {
-        $this->server_list = $this->convert_to_object($this->server_list);
+        $this->miner_list = $this->convert_to_object($this->miner_list);
 
         $x = 1;
-        foreach ($this->server_list as $name => $server) {
-            if ($fp = @fsockopen(gethostbyname($server->hostname), $server->port, $err_code, $err_str, $this->wait_timeout)) {
+        foreach ($this->miner_list as $name => $miner) {
+            if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
                 $this->miner_status[$name] = '1';
             } else {
                 $this->miner_status[$name] = '3';
