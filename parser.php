@@ -81,6 +81,9 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
         </div>
         <div class="box__body">
             <div class="stats stats--main">
+                <?php if ($parser->error) {
+                    echo $parser->error;
+                } ?>
                 <div class="stats__name"><?php echo $name; ?>
                     (<?php echo ($miner->coin == null) ? "N/A" : $miner->coin ?>)
                 </div>
@@ -118,12 +121,13 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
             <div class="stats">
                 <div class="stats__amount">Video Card Stats</div>
                 <div class="stats__caption">
-                    <table class="width: 100%">
+                    <table style="width: 100%">
                         <thead>
                         <tr>
                             <th class="stats__amount">Card</th>
                             <th class="stats__amount">Hashrate</th>
                             <th class="stats__amount">GPU Temp</th>
+                            <th class="stats__amount">Mem Temp</th>
                             <th class="stats__amount">Fan %</th>
                         </tr>
                         </thead>
@@ -132,17 +136,19 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
                         if (count((array)$miner->card_stats) >= 1) {
                             foreach ($miner->card_stats as $key => $stat) { ?>
                                 <tr>
-                                    <th>Card <?php echo $key; ?></th>
+                                    <th style="width: 35%;"><?php echo $key; ?></th>
                                     <th><?php echo number_format($stat->hashrate, 2) ?> MH/s</th>
                                     <th><?php echo $parser->show_temp_warning($stat->temp, "&deg; C") ?></th>
+                                    <th><?php echo $parser->show_temp_warning($stat->mem_temp, "&deg; C") ?></th>
                                     <th><?php echo $parser->show_fan_warning($stat->fan, "%") ?></th>
                                 </tr>
                             <?php }
                         } else { ?>
                             <tr>
-                                <td colspan="4"> No Card Data Available</td>
+                                <td colspan="5"> No Card Data Available</td>
                             </tr>
                         <?php } ?>
+
                         </tbody>
                     </table>
                 </div>

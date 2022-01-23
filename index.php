@@ -78,7 +78,7 @@ if ($debug_mode) {
             position: relative;
             display: inline-block;
             border-radius: 5px;
-            width: 480px;
+            width: 550px;
             height: 540px;
             vertical-align: top;
             margin-bottom: 10px;
@@ -130,7 +130,7 @@ if ($debug_mode) {
         }
 
         .stats__caption {
-            font-size: 18px;
+            font-size: 16px;
 
         }
 
@@ -175,7 +175,7 @@ if ($debug_mode) {
         }
 
         .stats__name {
-            font-size: 34px;
+            font-size: 26px;
         }
     </style>
 </head>
