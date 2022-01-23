@@ -40,14 +40,14 @@ class json_parser
         $this->miner_list = $this->convert_to_object($this->miner_list);
 
         //Make sure the request miner is in list
-        if (!$this->miner_list[$selected] || !is_object($this->miner_list[$selected])) {
+        if (!$this->miner_list->{$selected} || !is_object($this->miner_list->{$selected})) {
             return;
         }
-        $miner = $this->miner_list[$selected];
+        $miner = $this->miner_list->{$selected};
         if ($miner->is_trex) {
-            $this->miner_status[$selected] = $this->verify_trex_server($miner->host, $miner->port);
+            $this->miner_status[$selected] = $this->verify_trex_server($miner);
         } else {
-            $this->miner_status[$selected] = $this->verify_rpc_server($miner->host, $miner->port);
+            $this->miner_status[$selected] = $this->verify_rpc_server($miner);
         }
 
         $this->miner_data_results = (object)[];
@@ -74,7 +74,7 @@ class json_parser
 
     public function parse_all_trex_calls($selected)
     {
-
+        return [];
 
     }
 
@@ -90,9 +90,9 @@ class json_parser
         return '3';
     }
 
-    private function verify_trex_server($host, $port)
+    private function verify_trex_server($host)
     {
-
+        return '3';
     }
 
     private function get_rpc_server_data($miner)
