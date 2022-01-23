@@ -23,6 +23,7 @@
 //      'power_usage' => The power usage of the rig in watts, for profit calculation
 //      'power_cost' => Set the power cost in USD per KW/h, for profit calculation
 //      'pool_fee' => Set the pool fee percentage, for profit calculation
+//      'is_trex' => Set to true if using Trex miner, since it will need a different parser
 //]
 $miner_list = (object)[
     'Miner_1' => [
@@ -32,6 +33,7 @@ $miner_list = (object)[
         'power_usage' => null,
         'power_cost' => null,
         'pool_fee' => null,
+        'is_trex' => false
     ],
     'Miner_2' => [
         'hostname' => "server2.example.com",
@@ -40,6 +42,7 @@ $miner_list = (object)[
         'power_usage' => null,
         'power_cost' => null,
         'pool_fee' => null,
+        'is_trex' => false
     ]
 ];
 

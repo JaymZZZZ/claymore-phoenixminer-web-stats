@@ -19,7 +19,6 @@
 // ------------------------------------------------------------------------
 
 require_once 'conf.php';
-require_once 'json_parser.class.php';
 
 
 if ($debug_mode) {

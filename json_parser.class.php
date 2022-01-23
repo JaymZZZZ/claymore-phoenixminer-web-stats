@@ -34,22 +34,18 @@ class json_parser
     public $debug = FALSE;
 
 
-    public function parse_all_json_rpc_calls($selected = null)
+    public function parse_all_json_rpc_calls($selected)
     {
 
-        if (!$selected) {
-            $this->check_server_availability();
-        } else {
-            $this->miner_list = $this->convert_to_object($this->miner_list);
+        $this->miner_list = $this->convert_to_object($this->miner_list);
 
-            foreach ($this->miner_list as $name => $miner) {
+        foreach ($this->miner_list as $name => $miner) {
 
-                if ($selected == $name) {
-                    if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
-                        $this->miner_status[$name] = '1';
-                    } else {
-                        $this->miner_status[$name] = '3';
-                    }
+            if ($selected == $name) {
+                if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
+                    $this->miner_status[$name] = '1';
+                } else {
+                    $this->miner_status[$name] = '3';
                 }
             }
         }
