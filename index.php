@@ -24,6 +24,8 @@ require_once 'conf.php';
 if ($debug_mode) {
     error_reporting(E_ERROR | E_WARNING);
     ini_set('display_errors', 1);
+    ini_set('error_prepend_string', '<p style="color: white;">');
+    ini_set('error_append_string', '</p>');
 
 } else {
     error_reporting(0);
