@@ -39,100 +39,135 @@ class json_parser
 
         $this->miner_list = $this->convert_to_object($this->miner_list);
 
-        foreach ($this->miner_list as $name => $miner) {
-
-            if ($selected == $name) {
-                if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
-                    $this->miner_status[$name] = '1';
-                } else {
-                    $this->miner_status[$name] = '3';
-                }
-            }
+        //Make sure the request miner is in list
+        if (!$this->miner_list[$selected] || !is_object($this->miner_list[$selected])) {
+            return;
+        }
+        $miner = $this->miner_list[$selected];
+        if ($miner->is_trex) {
+            $this->miner_status[$selected] = $this->verify_trex_server($miner->host, $miner->port);
+        } else {
+            $this->miner_status[$selected] = $this->verify_rpc_server($miner->host, $miner->port);
         }
 
         $this->miner_data_results = (object)[];
         $this->miner_status = $this->convert_to_object($this->miner_status);
 
-        foreach ($this->miner_list as $name => $miner) {
 
-            if ($selected == null || $selected == $name) {
-
-                $miner_data = (object)[];
-                if ($this->miner_status->{$name} == 1) {
-                    $socket = fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str);
-
-                    if ($miner->password != null) {
-                        $append = ',"psw":"' . $miner->password . '"';
-                    } else {
-                        $append = '';
-                    }
-
-                    $data = '{"id":1,"jsonrpc":"2.0","method":"miner_getstat1"' . $append . '} ' . "\r\n\r\n";
-
-                    fputs($socket, $data);
-                    $buffer = null;
-                    while (!feof($socket)) {
-                        $buffer .= fgets($socket, $miner->port);
-                    }
-                    if ($socket) {
-                        fclose($socket);
-                    }
-
-                    $response = json_decode($buffer);
-                    $result = $response->result;
-
-                    $miner_info = explode(' - ', $result[0]);
-                    $miner_data->version = $miner_info[0];
-                    $miner_data->coin = $miner_info[1];
-
-                    $minutes = $result[1];
-                    $zero = new DateTime('@0');
-                    $offset = new DateTime('@' . $minutes * 60);
-                    $diff = $zero->diff($offset);
-                    $miner_data->uptime = $diff->format('%ad %hh %im');
-                    $hashrate_stats = explode(';', $result[2]);
-                    $card_hashrate_stats = explode(';', $result[3]);
-                    $fan_and_temps = explode(";", $result[6]);
-                    $miner_data->pool = $result[7];
-                    $invalid_share_stats = $result[8];
-
-
-                    $miner_data->stats = (object)[
-                        'hashrate' => round($hashrate_stats[0] / 1000, 2),
-                        'shares' => $hashrate_stats[1],
-                        'stale' => $invalid_share_stats[0],
-                        'rejected' => $hashrate_stats[2]
-                    ];
-
-                    $miner_data->card_stats = [];
-                    foreach ($card_hashrate_stats as $key => $card_hashrate_stat) {
-                        $val = $key * 2;
-                        $miner_data->card_stats[] = (object)[
-                            'hashrate' => round($card_hashrate_stat / 1000, 2),
-                            'temp' => $fan_and_temps[$val],
-                            'fan' => $fan_and_temps[$val + 1]
-                        ];
-                    }
-
-                    $temp_sum = 0;
-                    foreach ($miner_data->card_stats as $card_stat) {
-                        $temp_sum += $card_stat->temp;
-                    }
-                    $miner_data->temp_av = round($temp_sum / sizeof($miner_data->card_stats));
-
-                    if (is_numeric($miner->power_usage) && is_numeric($miner->power_cost) && is_numeric($miner->pool_fee)) {
-                        $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $miner->power_usage, $miner->power_cost, $miner->pool_fee);
-                    }
-                }
-
-                $this->miner_data_results->{$name} = $miner_data;
+        $miner_data = (object)[];
+        if ($this->miner_status->{$selected} == 1) {
+            if ($miner->is_trex) {
+                $miner_data = $this->get_trex_server_data($miner);
+            } else {
+                $miner_data = $this->get_rpc_server_data($miner);
             }
 
         }
 
+        $this->miner_data_results->{$selected} = $miner_data;
+
+
         $this->miner_data_results = $this->convert_to_object($this->miner_data_results);
 
         $this->get_farm_stats();
+    }
+
+    public function parse_all_trex_calls($selected)
+    {
+
+
+    }
+
+    private function verify_rpc_server($miner)
+    {
+        if (!is_object($miner)) {
+            return '3';
+        }
+        if ($fp = @fsockopen(gethostbyname($miner->host), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
+            return '1';
+        }
+
+        return '3';
+    }
+
+    private function verify_trex_server($host, $port)
+    {
+
+    }
+
+    private function get_rpc_server_data($miner)
+    {
+        if (!is_object($miner)) {
+            return [];
+        }
+        $miner_data = (object)[];
+
+        $socket = fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str);
+
+        if ($miner->password != null) {
+            $append = ',"psw":"' . $miner->password . '"';
+        } else {
+            $append = '';
+        }
+
+        $data = '{"id":1,"jsonrpc":"2.0","method":"miner_getstat1"' . $append . '} ' . "\r\n\r\n";
+
+        fputs($socket, $data);
+        $buffer = null;
+        while (!feof($socket)) {
+            $buffer .= fgets($socket, $miner->port);
+        }
+        if ($socket) {
+            fclose($socket);
+        }
+
+        $response = json_decode($buffer);
+        $result = $response->result;
+
+        $miner_info = explode(' - ', $result[0]);
+        $miner_data->version = $miner_info[0];
+        $miner_data->coin = $miner_info[1];
+
+        $minutes = $result[1];
+        $zero = new DateTime('@0');
+        $offset = new DateTime('@' . $minutes * 60);
+        $diff = $zero->diff($offset);
+        $miner_data->uptime = $diff->format('%ad %hh %im');
+        $hashrate_stats = explode(';', $result[2]);
+        $card_hashrate_stats = explode(';', $result[3]);
+        $fan_and_temps = explode(";", $result[6]);
+        $miner_data->pool = $result[7];
+        $invalid_share_stats = $result[8];
+
+
+        $miner_data->stats = (object)[
+            'hashrate' => round($hashrate_stats[0] / 1000, 2),
+            'shares' => $hashrate_stats[1],
+            'stale' => $invalid_share_stats[0],
+            'rejected' => $hashrate_stats[2]
+        ];
+
+        $miner_data->card_stats = [];
+        foreach ($card_hashrate_stats as $key => $card_hashrate_stat) {
+            $val = $key * 2;
+            $miner_data->card_stats[] = (object)[
+                'hashrate' => round($card_hashrate_stat / 1000, 2),
+                'temp' => $fan_and_temps[$val],
+                'fan' => $fan_and_temps[$val + 1]
+            ];
+        }
+
+        $temp_sum = 0;
+        foreach ($miner_data->card_stats as $card_stat) {
+            $temp_sum += $card_stat->temp;
+        }
+        $miner_data->temp_av = round($temp_sum / sizeof($miner_data->card_stats));
+
+        if (is_numeric($miner->power_usage) && is_numeric($miner->power_cost) && is_numeric($miner->pool_fee)) {
+            $miner_data->profitability = $this->get_profit_stats_from_api($miner_data->stats->hashrate, $miner_data->coin, $miner->power_usage, $miner->power_cost, $miner->pool_fee);
+        }
+
+        return $miner_data;
     }
 
     public function show_temp_warning($value, $append)
