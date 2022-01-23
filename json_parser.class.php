@@ -72,27 +72,25 @@ class json_parser
         $this->get_farm_stats();
     }
 
-    public function parse_all_trex_calls($selected)
-    {
-        return [];
-
-    }
 
     private function verify_rpc_server($miner)
     {
         if (!is_object($miner)) {
-            return '3';
+            return '-1';
         }
         if ($fp = @fsockopen(gethostbyname($miner->host), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
+            if ($fp) {
+                fclose($fp);
+            }
             return '1';
         }
 
         return '3';
     }
 
-    private function verify_trex_server($host)
+    private function verify_trex_server($miner)
     {
-        return '3';
+        return '-1';
     }
 
     private function get_rpc_server_data($miner)
@@ -168,6 +166,11 @@ class json_parser
         }
 
         return $miner_data;
+    }
+
+    private function get_trex_server_data($miner)
+    {
+        return [];
     }
 
     public function show_temp_warning($value, $append)
