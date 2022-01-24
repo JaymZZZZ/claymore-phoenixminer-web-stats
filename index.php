@@ -156,7 +156,7 @@ if ($debug_mode) {
         }
 
         .stats__value--negative {
-            color: #ee8b8f;
+            color: #9d050c;
             font-weight: bold;
         }
 
@@ -166,7 +166,7 @@ if ($debug_mode) {
         }
 
         .red-alert {
-            color: #ee8b8f;
+            color: #ad050c;
             font-weight: bold;
         }
 
