@@ -70,5 +70,5 @@ can buy my own drink :)
 
 This is what the application looks like:
 
-![Screenshot of claymore-phoenixminer-web-stats](https://raw.githubusercontent.com/JaymZZZZ/claymore-phoenixminer-web-stats/master/screenshot.png)
+![Screenshot of claymore-phoenixminer-web-stats](https://raw.githubusercontent.com/JaymZZZZ/claymore-phoenixminer-web-stats/main/screenshot.png)
 
