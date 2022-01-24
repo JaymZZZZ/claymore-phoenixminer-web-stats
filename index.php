@@ -79,7 +79,7 @@ if ($debug_mode) {
             display: inline-block;
             border-radius: 5px;
             width: 550px;
-            height: 540px;
+            height: 640px;
             vertical-align: top;
             margin-bottom: 10px;
         }
@@ -176,6 +176,14 @@ if ($debug_mode) {
 
         .stats__name {
             font-size: 26px;
+        }
+
+        .stats__update_time {
+            text-align: right;
+            position: absolute;
+            bottom: 10px;
+            color:white;
+            font-size: 10px;
         }
     </style>
 </head>

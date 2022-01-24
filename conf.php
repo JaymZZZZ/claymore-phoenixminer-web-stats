@@ -58,6 +58,10 @@ $wait_timeout = 3;
 $gpu_temp_yellow = 70;
 $gpu_temp_red = 75;
 
+//Set the GPU Memory Temp yellow and red alert values in Celsius
+$gpu_mem_temp_yellow = 70;
+$gpu_mem_temp_red = 75;
+
 //Set the MAXIMUM GPU Fan yellow and red alert values in Percent of max speed
 $gpu_fan_high_yellow = 50;
 $gpu_fan_high_red = 75;

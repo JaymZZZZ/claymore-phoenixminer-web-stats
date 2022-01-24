@@ -21,6 +21,8 @@
  * @var integer $wait_timeout
  * @var integer $gpu_temp_yellow
  * @var integer $gpu_temp_red
+ * @var integer $gpu_mem_temp_yellow
+ * @var integer $gpu_mem_temp_red
  * @var integer $gpu_fan_high_yellow
  * @var integer $gpu_fan_high_red
  * @var integer $gpu_fan_low_yellow
@@ -49,6 +51,8 @@ $parser->wait_timeout = $wait_timeout;
 
 $parser->gpu_temp_yellow = $gpu_temp_yellow;
 $parser->gpu_temp_red = $gpu_temp_red;
+$parser->gpu_mem_temp_yellow = $gpu_mem_temp_yellow;
+$parser->gpu_mem_temp_red = $gpu_mem_temp_red;
 $parser->gpu_fan_high_yellow = $gpu_fan_high_yellow;
 $parser->gpu_fan_high_red = $gpu_fan_high_red;
 $parser->gpu_fan_low_yellow = $gpu_fan_low_yellow;
@@ -92,8 +96,6 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
                 <div class="stats__change">
                     <div class="stats__value stats__value--positive">Uptime</div>
                     <div class="stats__period"><?php echo ($miner->uptime == null) ? "DOWN" : $miner->uptime ?></div>
-                    <div class="stats__value">Update Time</div>
-                    <div class="stats__period"><?php echo date("H:i:s Y-m-d"); ?></div>
                 </div>
             </div>
             <div class="stats">
@@ -120,11 +122,14 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
             </div>
             <div class="stats">
                 <div class="stats__amount">Video Card Stats</div>
+                <div class="stats__amount" style="padding-bottom: 10px;">
+                    ________________________________________________________________________________
+                </div>
                 <div class="stats__caption">
                     <table style="width: 100%">
                         <thead>
                         <tr>
-                            <th class="stats__amount">Card</th>
+                            <th class="stats__amount" style="text-align: left;">GPU Name</th>
                             <th class="stats__amount">Hashrate</th>
                             <th class="stats__amount">GPU Temp</th>
                             <th class="stats__amount">Mem Temp</th>
@@ -136,10 +141,10 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
                         if (count((array)$miner->card_stats) >= 1) {
                             foreach ($miner->card_stats as $key => $stat) { ?>
                                 <tr>
-                                    <th style="width: 35%;"><?php echo $key; ?></th>
+                                    <th style="width: 35%; text-align: left;"><?php echo $key; ?></th>
                                     <th><?php echo number_format($stat->hashrate, 2) ?> MH/s</th>
                                     <th><?php echo $parser->show_temp_warning($stat->temp, "&deg; C") ?></th>
-                                    <th><?php echo $parser->show_temp_warning($stat->mem_temp, "&deg; C") ?></th>
+                                    <th><?php echo $parser->show_mem_temp_warning($stat->mem_temp, "&deg; C") ?></th>
                                     <th><?php echo $parser->show_fan_warning($stat->fan, "%") ?></th>
                                 </tr>
                             <?php }
@@ -152,6 +157,9 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div>
+                <div class="stats__update_time">Last Updated On: <?php echo date("Y-m-d | H:i:s"); ?></div>
             </div>
         </div>
     </div>

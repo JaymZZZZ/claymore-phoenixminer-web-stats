@@ -26,6 +26,8 @@ class json_parser
     public $wait_timeout = 3;
     public $gpu_temp_yellow = 70;
     public $gpu_temp_red = 75;
+    public $gpu_mem_temp_yellow = 70;
+    public $gpu_mem_temp_red = 75;
     public $gpu_fan_high_yellow = 50;
     public $gpu_fan_high_red = 75;
     public $gpu_fan_low_yellow = 20;
@@ -247,6 +249,19 @@ class json_parser
 
     }
 
+    public function show_mem_temp_warning($value, $append)
+    {
+
+        if ($value >= $this->gpu_mem_temp_red) {
+            return "<div class='red-alert' style='display: inline'>$value$append</div>";
+        } else if ($value >= $this->gpu_mem_temp_yellow) {
+            return "<div class='yellow-alert' style='display: inline'>$value$append</div>";
+        } else {
+            return $value . $append;
+        }
+
+    }
+
     public function show_fan_warning($value, $append)
     {
 
@@ -275,27 +290,6 @@ class json_parser
         }
 
         return "<div class='" . $class . "' style='display: inline'>$value</div>";
-
-    }
-
-    private function check_server_availability()
-    {
-        $this->miner_list = $this->convert_to_object($this->miner_list);
-
-        $x = 1;
-        foreach ($this->miner_list as $name => $miner) {
-            if ($fp = @fsockopen(gethostbyname($miner->hostname), $miner->port, $err_code, $err_str, $this->wait_timeout)) {
-                $this->miner_status[$name] = '1';
-            } else {
-                $this->miner_status[$name] = '3';
-            }
-            if ($fp) {
-                fclose($fp);
-            }
-            $x++;
-        }
-
-        $this->miner_status = $this->convert_to_object($this->miner_status);
 
     }
 
