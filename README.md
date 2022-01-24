@@ -33,7 +33,7 @@ For TeamRedMiner:
 For T-Rex Miner:
 
 * First you need to generate your API key using `t-rex.exe --api-generate-key <YOUR_PASSWORD>`
-* Take the generated API key and append the following to your bat file - `--api-secure --api-read-only --api-bind-http:0.0.0.0:4067 --api-key <GENERATED_API_KEY>`
+* Take the generated API key and append the following to your bat file - `--api-https --api-read-only --api-bind-http 0.0.0.0:4067 --api-key <GENERATED_API_KEY>`
 
 For your server/machine hosting the app, make sure you have the `php-curl` module installed if you wish to have
 profitability calculations
