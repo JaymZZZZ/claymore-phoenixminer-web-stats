@@ -358,7 +358,7 @@ class json_parser
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-        if ($miner->trex_api_password) {
+        if (!is_null($miner->password)) {
 
             $login_url = $protocol . "://" . $miner->hostname . ":" . $miner->port . "/login?password=" . $miner->password;
             curl_setopt($ch, CURLOPT_URL, $login_url);
