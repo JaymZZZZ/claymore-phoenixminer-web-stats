@@ -72,3 +72,7 @@ This is what the application looks like:
 
 ![Screenshot of claymore-phoenixminer-web-stats](https://raw.githubusercontent.com/JaymZZZZ/claymore-phoenixminer-web-stats/main/screenshot.png)
 
+This is what the application looks like when something is down:
+
+![Screenshot of claymore-phoenixminer-web-stats](https://raw.githubusercontent.com/JaymZZZZ/claymore-phoenixminer-web-stats/main/screenshot_down.png)
+
