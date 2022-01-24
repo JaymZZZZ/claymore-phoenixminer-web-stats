@@ -141,7 +141,7 @@ $parser->parse_all_json_rpc_calls($_GET['name']);
                         if (count((array)$miner->card_stats) >= 1) {
                             foreach ($miner->card_stats as $key => $stat) { ?>
                                 <tr>
-                                    <th style="width: 35%; text-align: left;"><?php echo $key; ?></th>
+                                    <th style="width: 40%; text-align: left;"><?php echo $stat->name; ?></th>
                                     <th><?php echo number_format($stat->hashrate, 2) ?> MH/s</th>
                                     <th><?php echo $parser->show_temp_warning($stat->temp, "&deg; C") ?></th>
                                     <th><?php echo $parser->show_mem_temp_warning($stat->mem_temp, "&deg; C") ?></th>

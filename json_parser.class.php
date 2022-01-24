@@ -157,7 +157,8 @@ class json_parser
         $card_num = 1;
         foreach ($card_hashrate_stats as $key => $card_hashrate_stat) {
             $val = $key * 2;
-            $miner_data->card_stats["Card " . $card_num] = (object)[
+            $miner_data->card_stats[] = (object)[
+                'name' => "Card " . $card_num,
                 'hashrate' => round($card_hashrate_stat / 1000, 2),
                 'temp' => $fan_and_temps[$val],
                 'mem_temp' => "N/A",
@@ -214,7 +215,8 @@ class json_parser
 
         $miner_data->card_stats = [];
         foreach ($cards as $card) {
-            $miner_data->card_stats[$card->vendor . " " . $card->name] = (object)[
+            $miner_data->card_stats[] = (object)[
+                'name' => $card->vendor . " " . $card->name,
                 'hashrate' => round($card->hashrate / 1000000, 2),
                 'temp' => $card->temperature,
                 'mem_temp' => $card->memory_temperature,
