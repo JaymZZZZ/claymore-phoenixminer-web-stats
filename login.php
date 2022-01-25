@@ -22,26 +22,17 @@
 session_start();
 require_once 'conf.php';
 
-if ($require_admin_password) {
-
-    if ($_POST['submit'] && $_POST['submit'] == "login") {
-        $password = $_POST['password'];
-        if ($password == $admin_password) {
-            $_SESSION['user_logged_in'] = true;
-            $_SESSION['admin_password_hash'] = md5($password);
-        }
-    }
-
-    if (!isset($_SESSION['user_logged_in']) || !isset($_SESSION['admin_password_hash'])) {
-        require_once "login.php";
-        die();
-    }
-
-    if ($_SESSION['admin_password_hash'] != md5($admin_password)) {
-        require_once "login.php";
-        die();
-    }
+if (strpos($_SERVER['REQUEST_URI'], "login.php") !== FALSE) {
+    $url = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $url = str_replace("login.php", '', $url);
+    header("Location: " . $url);
+    die();
 }
+
+if (isset($_SESSION['user_logged_in']) && isset($_SESSION['admin_password_hash']) && $_SESSION['admin_password_hash'] == md5($admin_password)) {
+    die();
+}
+
 
 if ($debug_mode) {
     error_reporting(E_ERROR | E_WARNING);
@@ -59,7 +50,7 @@ if ($debug_mode) {
 <!DOCTYPE html>
 <html lang='en' class=''>
 <head>
-    <title>0 Miners | 0 MH/s</title>
+    <title>Login</title>
     <meta charset='UTF-8'>
     <meta name="robots" content="noindex">
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
@@ -96,31 +87,17 @@ if ($debug_mode) {
         }
 
         .box {
-            background: linear-gradient(#23ba58, #1d8241);
+            background: linear-gradient(#194e6e, #4992d9);
             position: relative;
             display: inline-block;
             border-radius: 5px;
             width: 550px;
-            height: 640px;
+            height: 200px;
             vertical-align: top;
+            text-align: center;
             margin-bottom: 10px;
         }
 
-        .box-debug {
-            background: linear-gradient(#fffc1c, #ccc508);
-            position: relative;
-            display: inline-block;
-            border-radius: 5px;
-            width: 95%;
-            min-height: 100px;
-            vertical-align: top;
-            margin-bottom: 10px;
-            overflow-wrap: normal;
-        }
-
-        .box-down {
-            background: linear-gradient(#9e3935, #993259);
-        }
 
         .box__header {
             padding: 10px 25px;
@@ -192,7 +169,7 @@ if ($debug_mode) {
             font-weight: bold;
         }
 
-        .stats--main .stats__amount {
+        .login__main {
             font-size: 40px;
         }
 
@@ -210,49 +187,22 @@ if ($debug_mode) {
     </style>
 </head>
 <body>
-<div class="stats stats--main">
-    <div class="stats__amount" id="global_hashrate">Global Hashrate: 0 MH/s</div>
+<div id="results_<?php echo $name; ?>"
+     class="box <?php if ($parser->miner_status->{$name} != 1) { ?> box-down <?php } else { ?> box-up <?php } ?>">
+    <div class="box__header">
+
+    </div>
+    <div class="box__body">
+        <div class="stats stats--main">
+            <div class="stats__name">Enter Password
+            </div>
+            <form method="post">
+                <input type="text" name="password">
+                <input type="submit" name="submit" value="login">
+            </form>
+        </div>
+    </div>
 </div>
-<?php foreach ($miner_list as $name => $miner) { ?>
-    <div id="results_<?php echo $name; ?>"></div>
-<?php } ?>
 
 </body>
-<script
-        src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-        crossorigin="anonymous"></script>
-<script language="JavaScript">
-    jQuery(document).ready(function ($) {
-
-
-
-        <?php foreach ($miner_list as $name => $miner) { ?>
-        $.get("parser.php?name=<?php echo $name;?>", function (data) {
-            $('#results_<?php echo $name;?>').replaceWith(data);
-        });
-        setInterval(function () {
-            $.get("parser.php?name=<?php echo $name;?>", function (data) {
-                $('#results_<?php echo $name;?>').replaceWith(data);
-            });
-        }, <?php echo $refresh_interval * 1000;?>);
-
-        <?php } ?>
-
-        setInterval(function () {
-            var down_nodes = $("div.box.box-down").find().prevObject.length;
-            var up_nodes = $("div.box.box-up").find().prevObject.length;
-            var hashrate = 0.0
-            $("div.stats__caption.result_hashrate").find().prevObject.each(function (miner) {
-                var text = $(this).text().split(" MH/s");
-                hashrate = hashrate + parseFloat(text[0]);
-            })
-
-            $('#global_hashrate').text('Global Hashrate: ' + hashrate + ' MH/s | ' + up_nodes + ' Up | ' + down_nodes + ' Down');
-            document.title = '' + up_nodes + ' Miners | ' + hashrate + ' MH/s';
-        }, <?php echo $refresh_interval * 1000;?>);
-
-
-    })
-</script>
 </html>
