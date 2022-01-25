@@ -56,6 +56,14 @@ Installation Instructions
     * Power cost - Cost of power in USD per KW/h (ex. 0.105)
     * Pool Fee - Current pool fee in percent (ex. 0.9)
 
+## Password protection
+
+The script now supports basic password protection, in order to enable it, set the following variables found in `conf.php`
+
+`$require_admin_password = 1;`
+
+`$admin_password = "<YOUR_PASSWORD>";`
+
 ## How Can I Help?
 
 If you find this little page useful, please consider buying me a drink, or at least donating a little bit of crypto so I

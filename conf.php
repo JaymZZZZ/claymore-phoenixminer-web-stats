@@ -13,7 +13,8 @@
  */
 // ------------------------------------------------------------------------
 
-$require_admin_password = 1;
+//Require basic password to view stats? Set to "1" if you want password protection then set your desired password below
+$require_admin_password = 0;
 $admin_password = "changeit";
 
 //Set the list of miners
